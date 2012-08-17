@@ -5,19 +5,12 @@
 package com.noheroes.buybox;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginManager;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import net.milkbowl.vault.economy.Economy;
 
-/*import com.noheroes.buybox.Listeners.BuyBoxBlockListener;*/
 
 
 /**
@@ -27,18 +20,12 @@ import net.milkbowl.vault.economy.Economy;
 
 public class BuyBox extends JavaPlugin {
 
-	private static final Logger log = Logger.getLogger("Minecraft");
+
 	public static Economy econ = null;
-	public boolean isEconEnabled() {
-        return (econ != null);
-	}
-	
 	private BuyBoxPlayerListener listener;
-    /*private BuyBoxBlockListener blockListener;*/
+   
 	
-	public void onEnable(){ 
-		/*playerListener = new BuyBoxPlayerListener (this);*/
-        /*blockListener = new BuyBoxBlockListener (this);*/
+	public void onEnable(){
 		listener = new BuyBoxPlayerListener(this);
         this.getServer().getPluginManager().registerEvents(listener, this);
         if (!this.setupEconomy()) {
@@ -47,22 +34,23 @@ public class BuyBox extends JavaPlugin {
             this.getServer().getPluginManager().disablePlugin(this);
             return;
         }
-
+        final FileConfiguration config = this.getConfig();
 		getLogger().info("BuyBox enabled");
-		
 	}
 	 
-	private void log(Level severe, String string) {
-		// TODO Auto-generated method stub
-		
+	public void onDisable(){ 
+		getLogger().info("BuyBox disabled");	
 	}
 
-	public void onDisable(){ 
-		getLogger().info("BuyBox disabled");
-		
+	private void log(Level severe, String string) {
+		// TODO Auto-generated method stub	
 	}
+
+	public boolean isEconEnabled() {
+        return (econ != null);
+	}	
 	
-		
+	
 	private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
