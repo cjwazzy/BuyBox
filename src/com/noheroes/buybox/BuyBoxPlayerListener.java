@@ -18,54 +18,60 @@ public class BuyBoxPlayerListener implements Listener {
     
     public BuyBoxPlayerListener(BuyBox bbx) {
         this.bbx = bbx;
-    }
-       
+    }     
 	
 	
     @EventHandler (ignoreCancelled=true, priority = EventPriority.NORMAL)
-    public void onPlayerClick(PlayerInteractEvent event) { // Left clicked block
-        if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
-        	// Insert air/block check, location check
-        	Player player = event.getPlayer();
-        	PlayerInventory inventory = player.getInventory();
-        	
-        	Material mat = Material.getMaterial(bbx.getConfig().getString("ItemInNeed"));
-        	ItemStack itemstack = new ItemStack(mat, 1);
-        	Material block = event.getClickedBlock().getType();
-        	
-        	if (block == Material.DISPENSER) {
-        		player.sendMessage("dispenser");
-        		if (bbx.itemsleft > 0) {
-        			if (inventory.contains(mat)) {
-        				player.sendMessage("item detected");
-        				EconomyResponse er = bbx.econ.withdrawPlayer(player.getName(), -bbx.getConfig().getInt("PricePerItem"));
-        				/*return er.transactionSuccess();*/
-        				inventory.removeItem(itemstack);
-        				bbx.itemsleft -= 1;
-        				bbx.getConfig().set("ItemPerPLayer", (bbx.itemsleft));
-        				bbx.saveConfig();
-        				bbx.reloadConfig();
-        				player.sendMessage("You sold 1 " + mat + " to Atlantis for " + ChatColor.GREEN + "$" + bbx.getConfig().getInt("PricePerItem") + ". We need " + bbx.itemsleft + " more.");
+    public void onPlayerClick(PlayerInteractEvent event) {
+        if (event.getAction().equals(Action.LEFT_CLICK_BLOCK) && event.getClickedBlock().getType() != null) {
+        	// if (location) {
+        		Player player = event.getPlayer();
+        		PlayerInventory inventory = player.getInventory();
+        		Material mat = Material.getMaterial(bbx.getConfig().getString("ItemInNeed"));
+        		ItemStack itemstack = new ItemStack(mat, 1);
+        		Material block = event.getClickedBlock().getType();
+        		Integer itemsleft = 0;
+        		if (block == Material.DISPENSER) {
+        			
+        			
+        			if(bbx.Itemsleft.containsKey(player)){ // player found, get itemsleft
+        				itemsleft = bbx.Itemsleft.get(player);
+        		    } else { // no player found, create player with max itemsleft
+        		        bbx.Itemsleft.put(player, bbx.getConfig().getInt("ItemsPerPlayer"));
+        		        // TODO write to minidb
+        		    }
+        			
+        			
+        			if (itemsleft > 0) {
+        				if (inventory.contains(mat)) {
+        					EconomyResponse er = bbx.econ.withdrawPlayer(player.getName(), -bbx.getConfig().getInt("PricePerItem"));
+        					/*return er.transactionSuccess();*/
+        					inventory.removeItem(itemstack);
+        					itemsleft -= 1;
+        					bbx.Itemsleft.put(player, itemsleft);
+        					// TODO write to minidb
+        					player.sendMessage("You sold 1 " + mat + " to Atlantis for " + ChatColor.GREEN + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.WHITE + ". We need " + itemsleft + " more.");
+        				} else {
+        					player.sendMessage(ChatColor.RED + "You do not have the requested material (" + mat + ")");
+        				}
         			} else {
-        				player.sendMessage(ChatColor.RED + "You do not have the requested material (" + mat + ")");
+        				player.sendMessage("Atlantis does not need any more materials from you at this time.  Thank you for you contributions.");
         			}
-        		} else {
-        			player.sendMessage("Atlantis does not need any more materials from you at this time.  Thank you for you contributions.");
+        			
         		}
-                
-            }
-        	// 	Testing Methods
-        	if (block == Material.FURNACE) {
-                player.sendMessage(ChatColor.GREEN + "Bummer, You burned your money. -$5");
-                EconomyResponse er = bbx.econ.withdrawPlayer(player.getName(), 5);
-            }
-        	if (block == Material.CHEST) {
-        		Double balance = bbx.econ.getBalance(player.getName());
-                player.sendMessage(ChatColor.GREEN + "Current balance is " + balance);
-            }
-        	// END Testing Methods 
+        		// TODO Remove: Testing Methods
+        		if (block == Material.FURNACE) {
+        			Double balance = bbx.econ.getBalance(player.getName());
+        			player.sendMessage(ChatColor.GREEN + "Bummer, You burned $5. Now you have " + balance + " " + bbx.econ.currencyNamePlural());
+        			EconomyResponse er = bbx.econ.withdrawPlayer(player.getName(), 5);
+        		}
+        		if (block == Material.CHEST) {
+        			Double balance = bbx.econ.getBalance(player.getName());
+        			player.sendMessage(ChatColor.GREEN + "Current balance is " + balance + " " + bbx.econ.currencyNamePlural());
+        		}
+        		// TODO Remove: END Testing Methods 
+        	//end if location }
         }
-        
     }
  
 	
