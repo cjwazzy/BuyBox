@@ -23,9 +23,12 @@ public class BuyBox extends JavaPlugin {
 
 	public static Economy econ = null;
 	private BuyBoxPlayerListener listener;
+	public int itemsleft;
    
 	
 	public void onEnable(){
+		final FileConfiguration config = this.getConfig();
+		itemsleft = getConfig().getInt("ItemsPerPlayer");
 		listener = new BuyBoxPlayerListener(this);
         this.getServer().getPluginManager().registerEvents(listener, this);
         if (!this.setupEconomy()) {
@@ -34,8 +37,7 @@ public class BuyBox extends JavaPlugin {
             this.getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        final FileConfiguration config = this.getConfig();
-		getLogger().info("BuyBox enabled");
+        getLogger().info("BuyBox enabled");
 	}
 	 
 	public void onDisable(){ 

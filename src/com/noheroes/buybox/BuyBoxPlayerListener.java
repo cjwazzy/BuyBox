@@ -21,27 +21,37 @@ public class BuyBoxPlayerListener implements Listener {
     }
        
 	
+	
     @EventHandler (ignoreCancelled=true, priority = EventPriority.NORMAL)
     public void onPlayerClick(PlayerInteractEvent event) { // Left clicked block
         if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
         	// Insert air/block check, location check
         	Player player = event.getPlayer();
         	PlayerInventory inventory = player.getInventory();
-        	Material mat = Material.COBBLESTONE;
+        	
+        	Material mat = Material.getMaterial(bbx.getConfig().getString("ItemInNeed"));
         	ItemStack itemstack = new ItemStack(mat, 1);
         	Material block = event.getClickedBlock().getType();
+        	
         	if (block == Material.DISPENSER) {
         		player.sendMessage("dispenser");
-        		if (inventory.contains(mat)) {
-        			player.sendMessage("item detected");
-        			EconomyResponse er = bbx.econ.withdrawPlayer(player.getName(), -bbx.getConfig().getInt("PricePerItem"));
-        	        /*return er.transactionSuccess();*/
-        			inventory.removeItem(itemstack); 
-        			player.sendMessage("You sold 1 " + mat + " to Atlantis for " + ChatColor.GREEN + "$" + bbx.getConfig().getInt("PricePerItem"));
-        	    } else {
-        	    	player.sendMessage(ChatColor.RED + "You do not have the requested material (" + mat + ")");
-        	    }
-        		
+        		if (bbx.itemsleft > 0) {
+        			if (inventory.contains(mat)) {
+        				player.sendMessage("item detected");
+        				EconomyResponse er = bbx.econ.withdrawPlayer(player.getName(), -bbx.getConfig().getInt("PricePerItem"));
+        				/*return er.transactionSuccess();*/
+        				inventory.removeItem(itemstack);
+        				bbx.itemsleft -= 1;
+        				bbx.getConfig().set("ItemPerPLayer", (bbx.itemsleft));
+        				bbx.saveConfig();
+        				bbx.reloadConfig();
+        				player.sendMessage("You sold 1 " + mat + " to Atlantis for " + ChatColor.GREEN + "$" + bbx.getConfig().getInt("PricePerItem") + ". We need " + bbx.itemsleft + " more.");
+        			} else {
+        				player.sendMessage(ChatColor.RED + "You do not have the requested material (" + mat + ")");
+        			}
+        		} else {
+        			player.sendMessage("Atlantis does not need any more materials from you at this time.  Thank you for you contributions.");
+        		}
                 
             }
         	// 	Testing Methods
