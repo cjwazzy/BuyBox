@@ -24,7 +24,7 @@ public class BuyBox extends JavaPlugin {
 
 	public static Economy econ = null;
 	private BuyBoxPlayerListener listener;
-	public Map<Player, Integer> Itemsleft = new HashMap<Player, Integer>(); // read from minidb
+	public Map<String, Integer> Itemsleft = new HashMap<String, Integer>(); // read from minidb
    
 	public void onEnable(){
 		final FileConfiguration config = this.getConfig();

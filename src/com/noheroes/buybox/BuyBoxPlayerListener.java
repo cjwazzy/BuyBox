@@ -23,32 +23,29 @@ public class BuyBoxPlayerListener implements Listener {
 	
     @EventHandler (ignoreCancelled=true, priority = EventPriority.NORMAL)
     public void onPlayerClick(PlayerInteractEvent event) {
-        if (event.getAction().equals(Action.LEFT_CLICK_BLOCK) && event.getClickedBlock().getType() != null) {
+        if (event.getAction().equals(Action.LEFT_CLICK_BLOCK) && event.getClickedBlock() != null) {
         	// if (location) {
         		Player player = event.getPlayer();
+        		String playername = player.getName().toLowerCase();
         		PlayerInventory inventory = player.getInventory();
         		Material mat = Material.getMaterial(bbx.getConfig().getString("ItemInNeed"));
         		ItemStack itemstack = new ItemStack(mat, 1);
         		Material block = event.getClickedBlock().getType();
         		Integer itemsleft = 0;
-        		if (block == Material.DISPENSER) {
-        			
-        			
-        			if(bbx.Itemsleft.containsKey(player)){ // player found, get itemsleft
-        				itemsleft = bbx.Itemsleft.get(player);
-        		    } else { // no player found, create player with max itemsleft
-        		        bbx.Itemsleft.put(player, bbx.getConfig().getInt("ItemsPerPlayer"));
-        		        // TODO write to minidb
+        		if (block == Material.DISPENSER) {      			
+        			if(!bbx.Itemsleft.containsKey(playername)){ // no player found, create player with max itemsleft
+        				bbx.Itemsleft.put(playername, bbx.getConfig().getInt("ItemsPerPlayer"));
         		    }
-        			
-        			
+        		    itemsleft = bbx.Itemsleft.get(playername);
+        		        // TODO write to minidb
+        		    		
         			if (itemsleft > 0) {
         				if (inventory.contains(mat)) {
         					EconomyResponse er = bbx.econ.withdrawPlayer(player.getName(), -bbx.getConfig().getInt("PricePerItem"));
         					/*return er.transactionSuccess();*/
         					inventory.removeItem(itemstack);
         					itemsleft -= 1;
-        					bbx.Itemsleft.put(player, itemsleft);
+        					bbx.Itemsleft.put(playername, itemsleft);
         					// TODO write to minidb
         					player.sendMessage("You sold 1 " + mat + " to Atlantis for " + ChatColor.GREEN + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.WHITE + ". We need " + itemsleft + " more.");
         				} else {
