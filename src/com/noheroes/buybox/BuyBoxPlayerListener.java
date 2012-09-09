@@ -14,11 +14,12 @@ import org.bukkit.inventory.PlayerInventory;
 
 
 public class BuyBoxPlayerListener implements Listener {
-	public static BuyBox bbx;
+	private BuyBox bbx;
     
     public BuyBoxPlayerListener(BuyBox bbx) {
         this.bbx = bbx;
     }     
+    
 	
 	
     @EventHandler (ignoreCancelled=true, priority = EventPriority.NORMAL)
@@ -29,7 +30,7 @@ public class BuyBoxPlayerListener implements Listener {
         		String playername = player.getName().toLowerCase();
         		PlayerInventory inventory = player.getInventory();
         		Material mat = Material.getMaterial(bbx.getConfig().getString("ItemInNeed"));
-        		ItemStack itemstack = new ItemStack(mat, 1);
+        		ItemStack itemstack = new ItemStack(Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")), 1);
         		Material block = event.getClickedBlock().getType();
         		Integer itemsleft = 0;
         		if (block == Material.DISPENSER) {      			
@@ -40,16 +41,16 @@ public class BuyBoxPlayerListener implements Listener {
         		        // TODO write to minidb
         		    		
         			if (itemsleft > 0) {
-        				if (inventory.contains(mat)) {
+        				if (inventory.contains(Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")))) {
         					EconomyResponse er = bbx.econ.withdrawPlayer(player.getName(), -bbx.getConfig().getInt("PricePerItem"));
         					/*return er.transactionSuccess();*/
         					inventory.removeItem(itemstack);
         					itemsleft -= 1;
         					bbx.Itemsleft.put(playername, itemsleft);
         					// TODO write to minidb
-        					player.sendMessage("You sold 1 " + mat + " to Atlantis for " + ChatColor.GREEN + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.WHITE + ". We need " + itemsleft + " more.");
+        					player.sendMessage("You sold 1 " + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + " to Atlantis for " + ChatColor.GREEN + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.WHITE + ". We need " + itemsleft + " more.");
         				} else {
-        					player.sendMessage(ChatColor.RED + "You do not have the requested material (" + mat + ")");
+        					player.sendMessage(ChatColor.RED + "You do not have the requested material (" + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + ")");
         				}
         			} else {
         				player.sendMessage("Atlantis does not need any more materials from you at this time.  Thank you for you contributions.");
