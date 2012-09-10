@@ -1,6 +1,6 @@
 name: BuyBox
 main: com.noheroes.buybox.BuyBox
-version: 0.6
+version: 0.7
 author: cjwazzy
 depend: [Vault]
 commands:

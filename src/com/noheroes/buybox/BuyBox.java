@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -24,8 +26,9 @@ import net.milkbowl.vault.economy.Economy;
 
 public class BuyBox extends JavaPlugin {
 
-	public static Economy econ = null;
+	private static final Logger logger = Logger.getLogger("Minecraft");
 	private BuyBoxPlayerListener listener;
+	public static Economy econ = null;
 	public Map<String, Integer> Itemsleft = new HashMap<String, Integer>();
 	public ArrayList<Player> bbxEditMode = new ArrayList<Player>();
    
@@ -59,7 +62,7 @@ public class BuyBox extends JavaPlugin {
 	}
 
 	public static void log(Level level, String message) {
-		BuyBox.log(Level.INFO, message);
+		BuyBox.logger.log(level, message);
 	}
 
 	public boolean isEconEnabled() {

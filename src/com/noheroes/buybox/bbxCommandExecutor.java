@@ -1,5 +1,7 @@
 package com.noheroes.buybox;
 
+import java.util.logging.Level;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -21,6 +23,7 @@ public class bbxCommandExecutor implements CommandExecutor {
 	public boolean onCommand(CommandSender cs, Command command, String label,
 			String[] args) {
 		String com;
+		String playername = cs.getName().toLowerCase();
         if (args.length == 0) {
             com = "help";
         }
@@ -52,6 +55,8 @@ public class bbxCommandExecutor implements CommandExecutor {
     			    }
     				cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
                 	cs.sendMessage(ChatColor.BLUE + "Itemsleft on all player purchase orders: reset to " + bbx.getConfig().getString("ItemsPerPlayer"));
+                	BuyBox.log(Level.INFO, "Admin " + playername + " set BuyBox amount at " + bbx.getConfig().getString("ItemsPerPlayer") + " and reset each player's itemsleft");
+                	BuyBox.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + bbx.econ.currencyNamePlural());
                 }
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid amount");
@@ -75,6 +80,8 @@ public class bbxCommandExecutor implements CommandExecutor {
                 	bbx.getConfig().set("PricePerItem", Integer.valueOf(args[1]));
                 	bbx.saveConfig();
                 	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
+                	BuyBox.log(Level.INFO, "Admin " + playername + " set BuyBox price at " + bbx.getConfig().getString("PricePerItem"));
+                	BuyBox.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + bbx.econ.currencyNamePlural());
                 }
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid price");
@@ -98,6 +105,8 @@ public class bbxCommandExecutor implements CommandExecutor {
                 	bbx.getConfig().set("ItemInNeed", (args[1]));
                 	bbx.saveConfig();
                 	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
+                	BuyBox.log(Level.INFO, "Admin " + playername + " set BuyBox material to " + bbx.getConfig().getString("ItemInNeed"));
+                	BuyBox.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + bbx.econ.currencyNamePlural());
                 }
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid price");
@@ -125,6 +134,7 @@ public class bbxCommandExecutor implements CommandExecutor {
 			    }
 				cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is still buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
             	cs.sendMessage(ChatColor.RED + "Itemsleft on all player purchase orders: reset to " + bbx.getConfig().getString("ItemsPerPlayer"));
+            	BuyBox.log(Level.INFO, "Admin " + playername + " reset all players' itemsleft to " + bbx.getConfig().getString("ItemsPerPlayer"));
             }
         }
         
@@ -142,6 +152,8 @@ public class bbxCommandExecutor implements CommandExecutor {
             	bbx.getConfig().set("CityName", (args[1]));
             	bbx.saveConfig();
             	cs.sendMessage(ChatColor.BLUE + "City name now set to " + bbx.getConfig().getString("CityName"));
+            	BuyBox.log(Level.INFO, "Admin " + playername + " set BuyBox city name to " + bbx.getConfig().getString("CityName"));
+            	BuyBox.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + bbx.econ.currencyNamePlural());
             }
         }
         
@@ -167,6 +179,7 @@ public class bbxCommandExecutor implements CommandExecutor {
             }
             else {
                     bbx.addPlayerToEditMode((Player)cs);
+                    BuyBox.log(Level.INFO, "Admin " + playername + " entered create mode");
             }
         }
         
@@ -175,7 +188,6 @@ public class bbxCommandExecutor implements CommandExecutor {
                 cs.sendMessage("You must be a player to use this command");
                 return true;
             } else {
-            	String playername = cs.getName().toLowerCase();
             	/* Reverse Permission Check */
             	if (!(/*cs.hasPermission("buybox.admin") && */cs.isOp())) {
             		cs.sendMessage("BuyBox Help:     " + ChatColor.YELLOW + "/buybox /bbox /bbx");
