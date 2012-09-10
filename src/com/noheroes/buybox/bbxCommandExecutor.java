@@ -35,7 +35,7 @@ public class bbxCommandExecutor implements CommandExecutor {
                 return true;
             }
             /* Permission Check */
-            if (/*!cs.hasPermission(Properties.adminPermissions) && */!cs.isOp()) {
+            if (/*!cs.hasPermission("buybox.admin") && */!cs.isOp()) {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 return true;
             }
@@ -44,8 +44,14 @@ public class bbxCommandExecutor implements CommandExecutor {
                 	bbx.getConfig().set("ItemsPerPlayer", Integer.valueOf(args[1]));
                 	bbx.saveConfig();
                 	bbx.Itemsleft.clear();
-                	// TODO Reset minidb
-                	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + " at " + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + " each.");
+                	// write to file
+    				try{
+    					SLAPI.save(bbx.Itemsleft,"itemsleft.bin");
+    			    }catch(Exception e){
+    			        e.printStackTrace();
+    			    }
+    				cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
+                	cs.sendMessage(ChatColor.BLUE + "Itemsleft on all player purchase orders: reset to " + bbx.getConfig().getString("ItemsPerPlayer"));
                 }
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid amount");
@@ -59,7 +65,7 @@ public class bbxCommandExecutor implements CommandExecutor {
                 return true;
             }
             /* Permission Check */
-            if (/*!cs.hasPermission(Properties.adminPermissions) && */!cs.isOp()) {
+            if (/*!cs.hasPermission("buybox.admin") && */!cs.isOp()) {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 return true;
             }
@@ -68,7 +74,7 @@ public class bbxCommandExecutor implements CommandExecutor {
                     // write PricePerItem to config here;
                 	bbx.getConfig().set("PricePerItem", Integer.valueOf(args[1]));
                 	bbx.saveConfig();
-                	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + " at " + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + " each.");
+                	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
                 }
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid price");
@@ -82,7 +88,7 @@ public class bbxCommandExecutor implements CommandExecutor {
                 return true;
             }
             /* Permission Check */
-            if (/*!cs.hasPermission(Properties.adminPermissions) && */!cs.isOp()) {
+            if (/*!cs.hasPermission("buybox.admin") && */!cs.isOp()) {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 return true;
             }
@@ -91,7 +97,7 @@ public class bbxCommandExecutor implements CommandExecutor {
                     // write ItemInNeed to config here;
                 	bbx.getConfig().set("ItemInNeed", (args[1]));
                 	bbx.saveConfig();
-                	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + " at " + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + " each.");
+                	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
                 }
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid price");
@@ -105,15 +111,20 @@ public class bbxCommandExecutor implements CommandExecutor {
                 return true;
             }
             /* Permission Check */
-            if (/*!cs.hasPermission(Properties.adminPermissions) && */!cs.isOp()) {
+            if (/*!cs.hasPermission("buybox.admin") && */!cs.isOp()) {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 return true;
             }
             else {
             	bbx.Itemsleft.clear();
-            	// TODO Reset minidb
-            	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is still buying " + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + " at " + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + " each.");
-            	cs.sendMessage(ChatColor.RED + "All player buy order items left reset to " + bbx.getConfig().getString("ItemsPerPlayer"));
+            	// write to file
+				try{
+					SLAPI.save(bbx.Itemsleft,"itemsleft.bin");
+			    }catch(Exception e){
+			        e.printStackTrace();
+			    }
+				cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is still buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
+            	cs.sendMessage(ChatColor.RED + "Itemsleft on all player purchase orders: reset to " + bbx.getConfig().getString("ItemsPerPlayer"));
             }
         }
         
@@ -123,7 +134,7 @@ public class bbxCommandExecutor implements CommandExecutor {
                 return true;
             }
             /* Permission Check */
-            if (/*!cs.hasPermission(Properties.adminPermissions) && */!cs.isOp()) {
+            if (/*!cs.hasPermission("buybox.admin") && */!cs.isOp()) {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 return true;
             }
@@ -145,7 +156,19 @@ public class bbxCommandExecutor implements CommandExecutor {
             }
         } 
         
-        
+        if (com.equalsIgnoreCase("create")) {
+            if (!(cs instanceof Player)) {
+                cs.sendMessage("You must be a player to use this command");
+                return true;
+            }
+            if (/*!cs.hasPermission(buybox.admin) && */!cs.isOp()) {
+                cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
+                return true;
+            }
+            else {
+                    bbx.addPlayerToEditMode((Player)cs);
+            }
+        }
         
         if (com.equalsIgnoreCase("help")) {
             if (!(cs instanceof Player)) {
@@ -153,25 +176,33 @@ public class bbxCommandExecutor implements CommandExecutor {
                 return true;
             } else {
             	String playername = cs.getName().toLowerCase();
-            	cs.sendMessage("BuyBox Help:     " + ChatColor.YELLOW + "/buybox /bbox /bbx");
-            	cs.sendMessage("Use '/bbx info' for more information");
-            	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is currently buying " + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + " at " + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + " each.");
-            	if (bbx.Itemsleft.get(playername) == null) {
-            		cs.sendMessage(ChatColor.BLUE + "You may sell " + bbx.getConfig().getInt("ItemsPerPlayer") + " more on this purchase order");
+            	/* Reverse Permission Check */
+            	if (!(/*cs.hasPermission("buybox.admin") && */cs.isOp())) {
+            		cs.sendMessage("BuyBox Help:     " + ChatColor.YELLOW + "/buybox /bbox /bbx");
+            		cs.sendMessage("Use '/bbx info' for more information");
             	}
-            	else {
-            		cs.sendMessage(ChatColor.BLUE + "You may sell " + bbx.Itemsleft.get(playername) + " more on this purchase order");
+            	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is currently buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
+            	/* Reverse Permission Check */
+            	if (!(/*cs.hasPermission("buybox.admin") && */cs.isOp())) {
+            		if (bbx.Itemsleft.get(playername) == null) {
+	            		cs.sendMessage(ChatColor.BLUE + "You may sell " + ChatColor.WHITE + bbx.getConfig().getInt("ItemsPerPlayer") + ChatColor.BLUE + " more on this purchase order");
+	            	}
+	            	else {
+	            		cs.sendMessage(ChatColor.BLUE + "You may sell " + ChatColor.WHITE + bbx.Itemsleft.get(playername) + ChatColor.BLUE + " more on this purchase order");
+	            	}
             	}
-            	
+            	cs.sendMessage(ChatColor.BLUE + "Buybox location is " + ChatColor.WHITE + bbx.getConfig().getInt("X") + ", " + bbx.getConfig().getInt("Y") + ", " + bbx.getConfig().getInt("Z"));
             	/* Permission Check */
-            	if (/*cs.hasPermission(Properties.adminPermissions) && */cs.isOp()) {
+            	if (/*cs.hasPermission("buybox.admin") && */cs.isOp()) {
             		cs.sendMessage("BuyBox Admin Command Help:     " + ChatColor.YELLOW + "/buybox /bbox /bbx");
             		cs.sendMessage(ChatColor.YELLOW + "/bbx price [#] " + ChatColor.WHITE + " Set the purchase price of a single item");
-            		cs.sendMessage(ChatColor.YELLOW + "/bbx amount [#] " + ChatColor.WHITE + " Set the max items a player may sell; resets count");
+            		cs.sendMessage(ChatColor.YELLOW + "/bbx amount [#] " + ChatColor.WHITE + " Set the max items per player; resets count");
             		cs.sendMessage(ChatColor.YELLOW + "/bbx mat [material or item ID] " + ChatColor.WHITE + " Set the item for purchase");
-            		cs.sendMessage(ChatColor.YELLOW + "/bbx city " + ChatColor.WHITE + " Sets your city name; No spaces allowed");
             		cs.sendMessage(ChatColor.YELLOW + "/bbx reset " + ChatColor.WHITE + " Resets all player items-left to the max amount");
             		cs.sendMessage(ChatColor.WHITE + "Please use " + ChatColor.YELLOW + "/bbx reset " + ChatColor.WHITE + "after changing commodity or price");
+            		cs.sendMessage(ChatColor.YELLOW + "/bbx create " + ChatColor.WHITE + " Create BuyBox; old locations will be overwritten");
+            		cs.sendMessage(ChatColor.YELLOW + "/bbx city " + ChatColor.WHITE + " Sets your city name; No spaces allowed");
+            		
             	}
             return true;	
             }

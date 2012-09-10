@@ -1,4 +1,7 @@
 PricePerItem: 5
-ItemsPerPlayer: 64
-ItemInNeed: COBBLESTONE
+ItemsPerPlayer: 0
+ItemInNeed: DIAMOND
 CityName: Atlantis
+X: 0
+Y: 0
+Z: 0
