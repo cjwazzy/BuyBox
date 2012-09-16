@@ -7,14 +7,12 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
-public class bbxCommandExecutor implements CommandExecutor {
-	
+public class BuyBoxCommandExecutor implements CommandExecutor {
 	private BuyBox bbx;
-	private final Plugin plugin = this.plugin;
+	private Utils utils;
     
-    public bbxCommandExecutor(BuyBox bbx) {
+    public BuyBoxCommandExecutor(BuyBox bbx) {
         this.bbx = bbx;
 
     }
@@ -46,17 +44,19 @@ public class bbxCommandExecutor implements CommandExecutor {
             	if (Utils.isInteger(args[1])) {
                 	bbx.getConfig().set("ItemsPerPlayer", Integer.valueOf(args[1]));
                 	bbx.saveConfig();
-                	bbx.Itemsleft.clear();
-                	// write to file
+                	bbx.itemsleftHash.clear();
+                	// write to mini
+    				utils.saveAll(bbx.itemsleftHash);
+    				// write to bin
     				try{
-    					SLAPI.save(bbx.Itemsleft,"itemsleft.bin");
+    					SLAPI.save(bbx.itemsleftHash,"itemsleftHash.bin");
     			    }catch(Exception e){
     			        e.printStackTrace();
     			    }
-    				cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
+    				cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + BuyBox.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
                 	cs.sendMessage(ChatColor.BLUE + "Itemsleft on all player purchase orders: reset to " + bbx.getConfig().getString("ItemsPerPlayer"));
-                	BuyBox.log(Level.INFO, "Admin " + playername + " set BuyBox amount at " + bbx.getConfig().getString("ItemsPerPlayer") + " and reset each player's itemsleft");
-                	BuyBox.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + bbx.econ.currencyNamePlural());
+                	bbx.log(Level.INFO, "Admin " + playername + " set BuyBox amount at " + bbx.getConfig().getString("ItemsPerPlayer") + " and reset each player's itemsleft");
+                	bbx.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + BuyBox.econ.currencyNamePlural());
                 }
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid amount");
@@ -79,9 +79,9 @@ public class bbxCommandExecutor implements CommandExecutor {
                     // write PricePerItem to config here;
                 	bbx.getConfig().set("PricePerItem", Integer.valueOf(args[1]));
                 	bbx.saveConfig();
-                	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
-                	BuyBox.log(Level.INFO, "Admin " + playername + " set BuyBox price at " + bbx.getConfig().getString("PricePerItem"));
-                	BuyBox.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + bbx.econ.currencyNamePlural());
+                	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + BuyBox.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
+                	bbx.log(Level.INFO, "Admin " + playername + " set BuyBox price at " + bbx.getConfig().getString("PricePerItem"));
+                	bbx.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + BuyBox.econ.currencyNamePlural());
                 }
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid price");
@@ -104,9 +104,9 @@ public class bbxCommandExecutor implements CommandExecutor {
                     // write ItemInNeed to config here;
                 	bbx.getConfig().set("ItemInNeed", (args[1]));
                 	bbx.saveConfig();
-                	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
-                	BuyBox.log(Level.INFO, "Admin " + playername + " set BuyBox material to " + bbx.getConfig().getString("ItemInNeed"));
-                	BuyBox.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + bbx.econ.currencyNamePlural());
+                	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is now buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + BuyBox.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
+                	bbx.log(Level.INFO, "Admin " + playername + " set BuyBox material to " + bbx.getConfig().getString("ItemInNeed"));
+                	bbx.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + BuyBox.econ.currencyNamePlural());
                 }
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid price");
@@ -125,16 +125,18 @@ public class bbxCommandExecutor implements CommandExecutor {
                 return true;
             }
             else {
-            	bbx.Itemsleft.clear();
-            	// write to file
+            	bbx.itemsleftHash.clear();
+            	// write to mini
+				utils.clearMini(bbx.itemsleftHash);
+				// write to bin
 				try{
-					SLAPI.save(bbx.Itemsleft,"itemsleft.bin");
+					SLAPI.save(bbx.itemsleftHash,"itemsleftHash.bin");
 			    }catch(Exception e){
 			        e.printStackTrace();
 			    }
-				cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is still buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
-            	cs.sendMessage(ChatColor.RED + "Itemsleft on all player purchase orders: reset to " + bbx.getConfig().getString("ItemsPerPlayer"));
-            	BuyBox.log(Level.INFO, "Admin " + playername + " reset all players' itemsleft to " + bbx.getConfig().getString("ItemsPerPlayer"));
+				cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is still buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + BuyBox.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
+            	cs.sendMessage(ChatColor.RED + "itemsleft on all player purchase orders: reset to " + bbx.getConfig().getString("ItemsPerPlayer"));
+            	bbx.log(Level.INFO, "Admin " + playername + " reset all players' itemsleft to " + bbx.getConfig().getString("ItemsPerPlayer"));
             }
         }
         
@@ -152,8 +154,8 @@ public class bbxCommandExecutor implements CommandExecutor {
             	bbx.getConfig().set("CityName", (args[1]));
             	bbx.saveConfig();
             	cs.sendMessage(ChatColor.BLUE + "City name now set to " + bbx.getConfig().getString("CityName"));
-            	BuyBox.log(Level.INFO, "Admin " + playername + " set BuyBox city name to " + bbx.getConfig().getString("CityName"));
-            	BuyBox.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + bbx.econ.currencyNamePlural());
+            	bbx.log(Level.INFO, "Admin " + playername + " set BuyBox city name to " + bbx.getConfig().getString("CityName"));
+            	bbx.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getInt("PricePerItem") + BuyBox.econ.currencyNamePlural());
             }
         }
         
@@ -179,7 +181,7 @@ public class bbxCommandExecutor implements CommandExecutor {
             }
             else {
                     bbx.addPlayerToEditMode((Player)cs);
-                    BuyBox.log(Level.INFO, "Admin " + playername + " entered create mode");
+                    bbx.log(Level.INFO, "Admin " + playername + " entered create mode");
             }
         }
         
@@ -193,14 +195,14 @@ public class bbxCommandExecutor implements CommandExecutor {
             		cs.sendMessage("BuyBox Help:     " + ChatColor.YELLOW + "/buybox /bbox /bbx");
             		cs.sendMessage("Use '/bbx info' for more information");
             	}
-            	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is currently buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + bbx.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
+            	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is currently buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + BuyBox.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
             	/* Reverse Permission Check */
             	if (!(/*cs.hasPermission("buybox.admin") && */cs.isOp())) {
-            		if (bbx.Itemsleft.get(playername) == null) {
+            		if (bbx.itemsleftHash.get(playername) == null) {
 	            		cs.sendMessage(ChatColor.BLUE + "You may sell " + ChatColor.WHITE + bbx.getConfig().getInt("ItemsPerPlayer") + ChatColor.BLUE + " more on this purchase order");
 	            	}
 	            	else {
-	            		cs.sendMessage(ChatColor.BLUE + "You may sell " + ChatColor.WHITE + bbx.Itemsleft.get(playername) + ChatColor.BLUE + " more on this purchase order");
+	            		cs.sendMessage(ChatColor.BLUE + "You may sell " + ChatColor.WHITE + bbx.itemsleftHash.get(playername) + ChatColor.BLUE + " more on this purchase order");
 	            	}
             	}
             	cs.sendMessage(ChatColor.BLUE + "Buybox location is " + ChatColor.WHITE + bbx.getConfig().getInt("X") + ", " + bbx.getConfig().getInt("Y") + ", " + bbx.getConfig().getInt("Z"));

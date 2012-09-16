@@ -6,10 +6,7 @@ package com.noheroes.buybox;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -26,43 +23,51 @@ import net.milkbowl.vault.economy.Economy;
 
 public class BuyBox extends JavaPlugin {
 
-	private static final Logger logger = Logger.getLogger("Minecraft");
+	private Utils utils;
 	private BuyBoxPlayerListener listener;
 	public static Economy econ = null;
-	public Map<String, Integer> Itemsleft = new HashMap<String, Integer>();
+	public HashMap<String, Integer> itemsleftHash = new HashMap<String, Integer>();
 	public ArrayList<Player> bbxEditMode = new ArrayList<Player>();
    
+	@SuppressWarnings("unused")
 	public void onEnable(){
-		@SuppressWarnings("unused")
-		final FileConfiguration config = this.getConfig();
-		try{
-			Itemsleft = SLAPI.load("itemsleft.bin"); 
-	    }catch(Exception e){
-	        //handle the exception
-	        e.printStackTrace();
-	    }
-		listener = new BuyBoxPlayerListener(this);
-        this.getServer().getPluginManager().registerEvents(listener, this);
-        getCommand("buybox").setExecutor(new bbxCommandExecutor(this));
-        if (!this.setupEconomy()) {
-            BuyBox.log(Level.SEVERE, "Vault failed to hook into any economy plugin.  Disbling plugin");
+		if (!this.setupEconomy()) {
+            log(Level.SEVERE, "Vault failed to hook into any economy plugin.  Disbling plugin");
             this.getServer().getPluginManager().disablePlugin(this);
             return;
+        } else {
+			final FileConfiguration config = this.getConfig();
+			/* try{
+				itemsleftHash = SLAPI.load("itemsleftHash.bin"); 
+		    }catch(Exception e){
+		        //handle the exception
+		        e.printStackTrace();
+		    } */
+			HashMap<String, Integer> itemsleftHash = utils.loadAll();
+			listener = new BuyBoxPlayerListener(this);
+	        this.getServer().getPluginManager().registerEvents(listener, this);
+	        getCommand("buybox").setExecutor(new BuyBoxCommandExecutor(this));
+	        
+	        
+	        getLogger().info("BuyBox enabled");
         }
-        getLogger().info("BuyBox enabled");
 	}
 	 
 	public void onDisable(){ 
+		getLogger().info("Saving Hash to Mini");
+		// Save to mini
+		utils.saveAll(itemsleftHash);
+		// Save to bin
 		try{
-			SLAPI.save(Itemsleft,"itemsleft.bin");
+			SLAPI.save(itemsleftHash,"itemsleftHash.bin");
 	    }catch(Exception e){
 	        e.printStackTrace();
 	    }
 		getLogger().info("BuyBox disabled");	
 	}
 
-	public static void log(Level level, String message) {
-		BuyBox.logger.log(level, message);
+	public void log(Level level, String message) {
+		this.getLogger().log(level, message);
 	}
 
 	public boolean isEconEnabled() {
@@ -89,8 +94,8 @@ public class BuyBox extends JavaPlugin {
     }
     
     public void removePlayerFromEditMode(Player player) {
-        bbxEditMode.remove(player);
+    	if (this.bbxEditMode.contains(player)) {
+    		bbxEditMode.remove(player);
+        }
     }
-
-	
 }
