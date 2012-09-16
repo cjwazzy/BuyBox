@@ -9,7 +9,8 @@ import com.miniDC.Mini;
 
 public class Utils {
 	private BuyBox bbx;
-    private String folder;
+    @SuppressWarnings("unused")
+	private String folder;
     private Mini minidb;
     
     public Utils(BuyBox bbx, String folder) {
@@ -72,7 +73,6 @@ public class Utils {
     }
     
     private Arguments ItemsLeftToArg(String playername) {
-        // Create new argument using chest ID as key
         Arguments arg = new Arguments(playername);
         arg.setValue("itemsleft", bbx.itemsleftHash.get(playername));
         return arg;

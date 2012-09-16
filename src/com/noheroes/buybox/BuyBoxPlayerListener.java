@@ -20,7 +20,6 @@ import org.bukkit.inventory.PlayerInventory;
 
 public class BuyBoxPlayerListener implements Listener {
 	private BuyBox bbx;
-	private Utils utils;
     
     public BuyBoxPlayerListener(BuyBox bbx) {
         this.bbx = bbx;
@@ -28,7 +27,8 @@ public class BuyBoxPlayerListener implements Listener {
     
 	
 	
-    @EventHandler (ignoreCancelled=true, priority = EventPriority.NORMAL)
+    @SuppressWarnings("deprecation") // player.updateinventory()...you can depreciate this when you replace it you stupid bukkit
+	@EventHandler (ignoreCancelled=true, priority = EventPriority.NORMAL)
     public void onPlayerClick(PlayerInteractEvent event) {
         //admin edit mode
     	if (bbx.bbxEditMode.contains(event.getPlayer())) {
@@ -80,70 +80,68 @@ public class BuyBoxPlayerListener implements Listener {
 	        		Player player = event.getPlayer();
 	        		String playername = player.getName().toLowerCase();
 	        		PlayerInventory inventory = player.getInventory();
-	        		// TODO:remove Material mat = Material.getMaterial(bbx.getConfig().getString("ItemInNeed"));
-	        		ItemStack itemstack = new ItemStack(Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")), 1);
-	        		Material block = event.getClickedBlock().getType();
 	        		Integer itemsleft = 0;
+	        		Material block = event.getClickedBlock().getType();
 	        		if (block == Material.CHEST) {
 	        			event.setCancelled(true);
 	        			if(!bbx.itemsleftHash.containsKey(playername)){
 	        				// no player found, create player with max itemsleft
 	        				bbx.itemsleftHash.put(playername, bbx.getConfig().getInt("ItemsPerPlayer"));
 	        				// write to mini
-	        				utils.saveAll(bbx.itemsleftHash);
-	        				// write to bin
-	        				try{
-	        					SLAPI.save(bbx.itemsleftHash,"itemsleftHash.bin");
-	        			    }catch(Exception e){
-	        			        e.printStackTrace();
-	        			    }
+	        				bbx.getUtils().saveAll(bbx.itemsleftHash);
 	        		    }
 	        		    itemsleft = bbx.itemsleftHash.get(playername);
-	        			if (itemsleft > 0) {
-	        				if (inventory.contains(Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")))) {
-	        					EconomyResponse er = BuyBox.econ.withdrawPlayer(player.getName(), -bbx.getConfig().getInt("PricePerItem"));
-	        					if (er.type == ResponseType.SUCCESS) {
-		        					//deduct from city account if it exists, just for fun
-		        					String city = bbx.getConfig().getString("CityName").toLowerCase();
-		        					if (BuyBox.econ.getBalance(city) > bbx.getConfig().getInt("PricePerItem")) {
-		        						BuyBox.econ.withdrawPlayer(city, bbx.getConfig().getInt("PricePerItem"));
-		        					}
-		        					
-		        					inventory.removeItem(itemstack);
-		        					itemsleft -= 1;
-		        					bbx.itemsleftHash.put(playername, itemsleft);
-		        					// write to mini
-			        				utils.saveAll(bbx.itemsleftHash);
-			        				// write to bin
-		            				try{
-		            					SLAPI.save(bbx.itemsleftHash,"itemsleftHash.bin");
-		            			    }catch(Exception e){
-		            			        e.printStackTrace();
-		            			    }
-		        					player.sendMessage("You sold 1 " + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + " to Atlantis for " + ChatColor.GREEN + bbx.getConfig().getInt("PricePerItem") + " " + BuyBox.econ.currencyNamePlural() + ChatColor.WHITE + ". We need " + itemsleft + " more.");
-		        					bbx.log(Level.INFO, playername + " sold 1 " + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + " to Atlantis for " + bbx.getConfig().getInt("PricePerItem") + " " + BuyBox.econ.currencyNamePlural() + " and may sell " + itemsleft + " more.");
-	        					}
+	        		    if (itemsleft > 0) {
+		        		    if (inventory.contains(Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")))) {
+		        		    	ItemStack neededstack = new ItemStack(Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")), itemsleft);
+		        		    	Integer removeamt = 0; //
+		        		    	Integer sellcount = 0; // count sold items for final player message
+	        					// loop through each stack in inv, looking for sales items, sell if purchase order allows it
+		        		    	for(ItemStack invstack : player.getInventory().getContents()){
+	        						if (itemsleft > 0) {
+		    	        	    	    if(invstack.getType() == neededstack.getType()){
+		    	        	    	    	neededstack.setAmount (itemsleft);
+		    	        	    	    	// set remove amount to smaller value (items left vs. amount in stack)
+		    	        	    	    	if(invstack.getAmount() >= neededstack.getAmount()){
+		    	        	    	    		removeamt = neededstack.getAmount();
+		    	        	    	    	}
+		    	        	    	    	
+		    	        	    	    	if(invstack.getAmount() < neededstack.getAmount()){
+		    	        	    	    	    removeamt = invstack.getAmount();
+		    	        	    	    	}
+		    	        	    	    	
+		    	        	    	    	EconomyResponse er = BuyBox.econ.withdrawPlayer(player.getName(), -(removeamt * bbx.getConfig().getInt("PricePerItem")));
+		    	        	    	    	if (er.type == ResponseType.SUCCESS) {
+					        					//deduct from city account if it exists, just for fun
+					        					String city = bbx.getConfig().getString("CityName").toLowerCase();
+					        					if (BuyBox.econ.getBalance(city) > (removeamt * bbx.getConfig().getInt("PricePerItem"))) {
+					        						BuyBox.econ.withdrawPlayer(city, (removeamt * bbx.getConfig().getInt("PricePerItem")));
+					        					}
+					        					ItemStack removestack = new ItemStack(Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")), removeamt);
+					        					inventory.removeItem(removestack);
+					        					sellcount += removeamt;
+					        					itemsleft -= removeamt;
+					        					bbx.itemsleftHash.put(playername, itemsleft);
+					        					// write to mini
+						        				bbx.getUtils().saveAll(bbx.itemsleftHash);
+					        					bbx.log(Level.INFO, playername + " sold " + removeamt + " " + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + " to Atlantis for " + (removeamt * bbx.getConfig().getInt("PricePerItem")) + " " + BuyBox.econ.currencyNamePlural() + " and may sell " + itemsleft + " more.");
+				        					}
+		    	        	    	    } else {
+		    	        	    	    	continue; // skip stack if it's not correct material
+		    	        	    	    }
+	        						} else {
+	        							break; // stop looping if purchase order is exhausted
+	        						}
+	    	        	    	}
+		        		    	player.updateInventory();
+	        					player.sendMessage("You sold " + sellcount + " " + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + " to Atlantis for " + ChatColor.GREEN + (sellcount * bbx.getConfig().getInt("PricePerItem")) + " " + BuyBox.econ.currencyNamePlural() + ChatColor.WHITE + ". We need " + itemsleft + " more.");	
 	        				} else {
 	        					player.sendMessage(ChatColor.RED + "You do not have the requested material (" + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + ")");
 	        				}
 	        			} else {
 	        				player.sendMessage("Atlantis does not need any more materials from you at this time.  Thank you for you contributions.");
 	        			}
-	        			
 	        		}
-	        		// TODO Remove: Testing Methods
-	        		if (block == Material.FURNACE) {
-	        			Double balance = BuyBox.econ.getBalance(player.getName());
-	        			player.sendMessage(ChatColor.GREEN + "Bummer, You burned $5. Now you have " + balance + " " + BuyBox.econ.currencyNamePlural());
-	        			@SuppressWarnings("unused")
-						EconomyResponse er = BuyBox.econ.withdrawPlayer(player.getName(), 5);
-	        		}
-	        		
-	        		if (block == Material.DISPENSER) {
-	        			Double balance = BuyBox.econ.getBalance(player.getName());
-	        			player.sendMessage(ChatColor.GREEN + "Current balance is " + balance + " " + BuyBox.econ.currencyNamePlural());
-	        		}
-	        		// TODO Remove: END Testing Methods 
 	        	}
 	        }
 	    }

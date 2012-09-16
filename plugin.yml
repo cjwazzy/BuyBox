@@ -1,6 +1,6 @@
 name: BuyBox
 main: com.noheroes.buybox.BuyBox
-version: 0.75
+version: 0.8
 author: cjwazzy
 depend: [Vault]
 commands:
@@ -8,4 +8,8 @@ commands:
     description: BuyBox setup commands for admins.  Use /buybox help for more
     aliases: [bbox, bbx]
     usage: Type /buybox help for more information. Aliases include /bbox and /bbx
+permissions:
+  buybox.admin:
+    description: Allows admin to set purchase orders
+    default: op
     

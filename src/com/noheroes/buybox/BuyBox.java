@@ -37,12 +37,7 @@ public class BuyBox extends JavaPlugin {
             return;
         } else {
 			final FileConfiguration config = this.getConfig();
-			/* try{
-				itemsleftHash = SLAPI.load("itemsleftHash.bin"); 
-		    }catch(Exception e){
-		        //handle the exception
-		        e.printStackTrace();
-		    } */
+			utils = new Utils(this, "BuyBox");
 			HashMap<String, Integer> itemsleftHash = utils.loadAll();
 			listener = new BuyBoxPlayerListener(this);
 	        this.getServer().getPluginManager().registerEvents(listener, this);
@@ -57,14 +52,12 @@ public class BuyBox extends JavaPlugin {
 		getLogger().info("Saving Hash to Mini");
 		// Save to mini
 		utils.saveAll(itemsleftHash);
-		// Save to bin
-		try{
-			SLAPI.save(itemsleftHash,"itemsleftHash.bin");
-	    }catch(Exception e){
-	        e.printStackTrace();
-	    }
 		getLogger().info("BuyBox disabled");	
 	}
+	
+	public Utils getUtils() {
+		return utils;
+		}
 
 	public void log(Level level, String message) {
 		this.getLogger().log(level, message);
