@@ -37,7 +37,7 @@ public class BuyBox extends JavaPlugin {
             return;
         } else {
 			final FileConfiguration config = this.getConfig();
-			utils = new Utils(this, "BuyBox");
+			utils = new Utils(this,  this.getDataFolder().getPath());
 			HashMap<String, Integer> itemsleftHash = utils.loadAll();
 			listener = new BuyBoxPlayerListener(this);
 	        this.getServer().getPluginManager().registerEvents(listener, this);

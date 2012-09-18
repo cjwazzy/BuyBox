@@ -64,7 +64,7 @@ public class BuyBoxPlayerListener implements Listener {
         			event.setCancelled(true);
         			player.sendMessage("This is " + bbx.getConfig().getString("CityName") + "'s BuyBox.  To see current purchase orders, use any of the following: " + ChatColor.YELLOW + "/buybox /bbox /bbx");
                 	player.sendMessage("Use '/bbx info' for more information");
-                	player.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is currently buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getInt("PricePerItem") + " " + BuyBox.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
+                	player.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is currently buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getDouble("PricePerItem") + " " + BuyBox.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
                 	if (bbx.itemsleftHash.get(playername) == null) {
 	            		player.sendMessage(ChatColor.BLUE + "You may sell " + ChatColor.WHITE + bbx.getConfig().getInt("ItemsPerPlayer") + ChatColor.BLUE + " more on this purchase order");
 	            	}
@@ -97,44 +97,81 @@ public class BuyBoxPlayerListener implements Listener {
 		        		    	Integer removeamt = 0; //
 		        		    	Integer sellcount = 0; // count sold items for final player message
 	        					// loop through each stack in inv, looking for sales items, sell if purchase order allows it
+		        		    	if (player.hasPermission("buybox.admin") && player.isOp()) { //DEBUG
+	        		    			player.sendMessage(ChatColor.GRAY + "Correct item found, Searching each slot"); //DEBUG
+	        		    		} //DEBUG
 		        		    	for(ItemStack invstack : player.getInventory().getContents()){
+		        		    		if (player.hasPermission("buybox.admin") && player.isOp()) { //DEBUG
+		        		    			player.sendMessage(ChatColor.GRAY + "Searching individual slot"); //DEBUG
+		        		    		} //DEBUG
 	        						if (itemsleft > 0) {
-		    	        	    	    if(invstack.getType() == neededstack.getType()){
-		    	        	    	    	neededstack.setAmount (itemsleft);
-		    	        	    	    	// set remove amount to smaller value (items left vs. amount in stack)
-		    	        	    	    	if(invstack.getAmount() >= neededstack.getAmount()){
-		    	        	    	    		removeamt = neededstack.getAmount();
-		    	        	    	    	}
-		    	        	    	    	
-		    	        	    	    	if(invstack.getAmount() < neededstack.getAmount()){
-		    	        	    	    	    removeamt = invstack.getAmount();
-		    	        	    	    	}
-		    	        	    	    	
-		    	        	    	    	EconomyResponse er = BuyBox.econ.withdrawPlayer(player.getName(), -(removeamt * bbx.getConfig().getInt("PricePerItem")));
-		    	        	    	    	if (er.type == ResponseType.SUCCESS) {
-					        					//deduct from city account if it exists, just for fun
-					        					String city = bbx.getConfig().getString("CityName").toLowerCase();
-					        					if (BuyBox.econ.getBalance(city) > (removeamt * bbx.getConfig().getInt("PricePerItem"))) {
-					        						BuyBox.econ.withdrawPlayer(city, (removeamt * bbx.getConfig().getInt("PricePerItem")));
+	        							if (!(invstack == null)) {
+			    	        	    	    if(invstack.getType() == neededstack.getType()){
+			    	        	    	    	if (player.hasPermission("buybox.admin") && player.isOp()) { //DEBUG
+			    	        		    			player.sendMessage(ChatColor.GRAY + "Correct item found in this slot, initiating sale"); //DEBUG
+			    	        		    		} //DEBUG
+			    	        	    	    	neededstack.setAmount (itemsleft);
+			    	        	    	    	// set remove amount to smaller value (items left vs. amount in stack)
+			    	        	    	    	if(invstack.getAmount() >= neededstack.getAmount()){
+			    	        	    	    		removeamt = neededstack.getAmount();
+			    	        	    	    		if (player.hasPermission("buybox.admin") && player.isOp()) { //DEBUG
+			    		        		    			player.sendMessage(ChatColor.GRAY + "PO smaller than stack, exhausting PO"); //DEBUG
+			    		        		    		} //DEBUG
+			    	        	    	    	}
+			    	        	    	    	
+			    	        	    	    	if(invstack.getAmount() < neededstack.getAmount()){
+			    	        	    	    	    removeamt = invstack.getAmount();
+			    	        	    	    	    if (player.hasPermission("buybox.admin") && player.isOp()) { //DEBUG
+			    		        		    			player.sendMessage(ChatColor.GRAY + "Stack smaller than PO, selling whole stack"); //DEBUG
+			    		        		    		} //DEBUG
+			    	        	    	    	}
+			    	        	    	    	
+			    	        	    	    	EconomyResponse er = BuyBox.econ.withdrawPlayer(player.getName(), -(removeamt * bbx.getConfig().getDouble("PricePerItem")));
+			    	        	    	    	if (er.type == ResponseType.SUCCESS) {
+						        					//deduct from city account if it exists, just for fun
+						        					String city = bbx.getConfig().getString("CityName").toLowerCase();
+						        					if (BuyBox.econ.getBalance(city) > (removeamt * bbx.getConfig().getDouble("PricePerItem"))) {
+						        						BuyBox.econ.withdrawPlayer(city, (removeamt * bbx.getConfig().getDouble("PricePerItem")));
+						        					}
+						        					ItemStack removestack = new ItemStack(Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")), removeamt);
+						        					inventory.removeItem(removestack);
+						        					sellcount += removeamt;
+						        					itemsleft -= removeamt;
+						        					bbx.itemsleftHash.put(playername, itemsleft);
+						        					// write to mini
+							        				bbx.getUtils().saveAll(bbx.itemsleftHash);
+						        					bbx.log(Level.INFO, playername + " sold " + removeamt + " " + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + " to Atlantis for " + (removeamt * bbx.getConfig().getDouble("PricePerItem")) + " " + BuyBox.econ.currencyNamePlural() + " and may sell " + itemsleft + " more.");
+						        					if (player.hasPermission("buybox.admin") && player.isOp()) { //DEBUG
+						        		    			player.sendMessage(ChatColor.GRAY + "stack sale of " + removeamt + " " + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + " for " + (removeamt * bbx.getConfig().getDouble("PricePerItem")) + " " + BuyBox.econ.currencyNamePlural() + "; may sell " + itemsleft + " more."); //DEBUG
+						        		    		} //DEBUG
+					        					} else {
+					        						if (player.hasPermission("buybox.admin") && player.isOp()) { //DEBUG
+					        							player.sendMessage(ChatColor.RED + "Economy exchange failure, canceling transaction");
+			    		        		    		} //DEBUG
 					        					}
-					        					ItemStack removestack = new ItemStack(Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")), removeamt);
-					        					inventory.removeItem(removestack);
-					        					sellcount += removeamt;
-					        					itemsleft -= removeamt;
-					        					bbx.itemsleftHash.put(playername, itemsleft);
-					        					// write to mini
-						        				bbx.getUtils().saveAll(bbx.itemsleftHash);
-					        					bbx.log(Level.INFO, playername + " sold " + removeamt + " " + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + " to Atlantis for " + (removeamt * bbx.getConfig().getInt("PricePerItem")) + " " + BuyBox.econ.currencyNamePlural() + " and may sell " + itemsleft + " more.");
-				        					}
-		    	        	    	    } else {
-		    	        	    	    	continue; // skip stack if it's not correct material
-		    	        	    	    }
+			    	        	    	    } else {
+			    	        	    	    	
+			    	        	    	    	continue; // skip stack if it's not correct material
+			    	        	    	    }
+	        							} else {
+	        								continue; // skip stack if it's empty
+	        							}
 	        						} else {
+	        							if (player.hasPermission("buybox.admin") && player.isOp()) { //DEBUG
+    		        		    			player.sendMessage(ChatColor.GRAY + "Purchase Order exhausted, stop loop"); //DEBUG
+    		        		    		} //DEBUG
 	        							break; // stop looping if purchase order is exhausted
 	        						}
 	    	        	    	}
+		        		    	if (player.hasPermission("buybox.admin") && player.isOp()) { //DEBUG
+	        		    			player.sendMessage(ChatColor.GRAY + "Transaction Complete, update player inv and report to player"); //DEBUG
+	        		    		} //DEBUG
 		        		    	player.updateInventory();
-	        					player.sendMessage("You sold " + sellcount + " " + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + " to Atlantis for " + ChatColor.GREEN + (sellcount * bbx.getConfig().getInt("PricePerItem")) + " " + BuyBox.econ.currencyNamePlural() + ChatColor.WHITE + ". We need " + itemsleft + " more.");	
+		        		    	if (sellcount > 0) {
+		        		    		player.sendMessage("You sold " + sellcount + " " + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + " to Atlantis for " + ChatColor.GREEN + (sellcount * bbx.getConfig().getDouble("PricePerItem")) + " " + BuyBox.econ.currencyNamePlural() + ChatColor.WHITE + ". We need " + itemsleft + " more.");
+		        		    	} else {
+		        		    		player.sendMessage("No sale: please report this event to an admin for debugging");
+		        		    	}
 	        				} else {
 	        					player.sendMessage(ChatColor.RED + "You do not have the requested material (" + Utils.getMaterialFromString(bbx.getConfig().getString("ItemInNeed")) + ")");
 	        				}
