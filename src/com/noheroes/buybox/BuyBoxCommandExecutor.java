@@ -34,7 +34,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 return true;
             }
             // Permission Check
-            if (!cs.hasPermission("buybox.admin") && cs.isOp()) {
+            if (!(cs.hasPermission("buybox.admin") && cs.isOp())) {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 bbx.log(Level.INFO, "Non-admin " + playername + " attempted to use /buybox amount");
                 return true;
@@ -54,6 +54,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid amount.  Please use a nonnegative integer");
                 }
+            	return true;
             }
         }
         
@@ -63,7 +64,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 return true;
             }
             // Permission Check
-            if (!cs.hasPermission("buybox.admin") && cs.isOp()) {
+            if (!(cs.hasPermission("buybox.admin") && cs.isOp())) {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 bbx.log(Level.INFO, "Non-admin " + playername + " attempted to use /buybox price");
                 return true;
@@ -80,6 +81,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid price.  Please use a non-negative number; decimals are allowed.");
                 }
+                return true;
             }
         }
         
@@ -89,7 +91,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 return true;
             }
             // Permission Check
-            if (!cs.hasPermission("buybox.admin") && cs.isOp()) {
+            if (!(cs.hasPermission("buybox.admin") && cs.isOp())) {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 bbx.log(Level.INFO, "Non-admin " + playername + " attempted to use /buybox material");
                 return true;
@@ -106,6 +108,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 else {
                 	cs.sendMessage(ChatColor.RED + "That is not a valid material");
                 }
+                return true;
             }
         }
         
@@ -127,6 +130,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
 				cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is still buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getDouble("PricePerItem") + " " + BuyBox.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
             	cs.sendMessage(ChatColor.RED + "itemsleft on all player purchase orders: reset to " + bbx.getConfig().getString("ItemsPerPlayer"));
             	bbx.log(Level.INFO, "Admin " + playername + " reset all players' itemsleft to " + bbx.getConfig().getString("ItemsPerPlayer"));
+            	return true;
             }
         }
         
@@ -136,7 +140,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 return true;
             }
             // Permission Check
-            if (!cs.hasPermission("buybox.admin") && cs.isOp()) {
+            if (!(cs.hasPermission("buybox.admin") && cs.isOp())) {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 bbx.log(Level.INFO, "Non-admin " + playername + " attempted to use /buybox city");
                 return true;
@@ -147,6 +151,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
             	cs.sendMessage(ChatColor.BLUE + "City name now set to " + bbx.getConfig().getString("CityName"));
             	bbx.log(Level.INFO, "Admin " + playername + " set BuyBox city name to " + bbx.getConfig().getString("CityName"));
             	bbx.log(Level.INFO, "After Admin " + playername + "'s action, BuyBox status is number: " + bbx.getConfig().getString("ItemsPerPlayer") + ", material: " + bbx.getConfig().getString("ItemInNeed") + ", price: " + bbx.getConfig().getDouble("PricePerItem") + BuyBox.econ.currencyNamePlural());
+            	return true;
             }
         }
         
@@ -166,13 +171,14 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 cs.sendMessage("You must be a player to use this command");
                 return true;
             }
-            if (!cs.hasPermission("buybox.admin") && cs.isOp()) {
+            if (!(cs.hasPermission("buybox.admin") && cs.isOp())) {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 return true;
             }
             else {
                     bbx.addPlayerToEditMode((Player)cs);
                     bbx.log(Level.INFO, "Admin " + playername + " entered create mode");
+                    return true;
             }
         }
         
@@ -181,7 +187,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 cs.sendMessage("You must be a player to use this command");
                 return true;
             }
-            if (!cs.hasPermission("buybox.admin") && cs.isOp()) {
+            if (!(cs.hasPermission("buybox.admin") && cs.isOp())) {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 bbx.log(Level.INFO, "Non-admin " + playername + " attempted to use /buybox reload");
                 return true;
@@ -191,6 +197,39 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
 				bbx.itemsleftHash = bbx.getUtils().loadAll();
                 bbx.log(Level.INFO, "Admin " + playername + " reloaded the Config and itemsleft Hashmap from disk (minidb)");
                 cs.sendMessage(ChatColor.RED + "Config and itemsleft Hashmap reloaded");
+                return true;
+            }
+        }
+        
+        if (com.equalsIgnoreCase("debug")) {
+            if (!(cs instanceof Player)) {
+                cs.sendMessage("You must be a player to use this command");
+                return true;
+            }
+            // Permission Check
+            if (!(cs.hasPermission("buybox.admin") && cs.isOp())) {
+                cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
+                bbx.log(Level.INFO, "Non-admin " + playername + " attempted to use /buybox debug");
+                return true;
+            }
+            else {
+            	if (args[1].equalsIgnoreCase ("on") || args[1].equalsIgnoreCase ("true") || args[1].equalsIgnoreCase ("enable")) {
+            		bbx.getConfig().set("Debug", "on");
+                	bbx.saveConfig();
+                	cs.sendMessage(ChatColor.BLUE + "BuyBox debug mode is now " + bbx.getConfig().getString("Debug") + ", check console for debug messages.");
+                	bbx.log(Level.INFO, "BuyBox debug mode is now " + bbx.getConfig().getString("Debug"));
+            	}
+            	if (args[1].equalsIgnoreCase ("off") || args[1].equalsIgnoreCase ("false") || args[1].equalsIgnoreCase ("disable")) {
+            		bbx.getConfig().set("Debug", "off");
+                	bbx.saveConfig();
+                	cs.sendMessage(ChatColor.BLUE + "BuyBox debug mode is now " + bbx.getConfig().getString("Debug") + ", check console for debug messages.");
+                	bbx.log(Level.INFO, "BuyBox debug mode is now " + bbx.getConfig().getString("Debug"));
+            	}
+            	if (!(args[1].equalsIgnoreCase ("on") || args[1].equalsIgnoreCase ("true") || args[1].equalsIgnoreCase ("enable") || args[1].equalsIgnoreCase ("off") || args[1].equalsIgnoreCase ("false") || args[1].equalsIgnoreCase ("disable"))) {
+                	cs.sendMessage(ChatColor.BLUE + "Invalid debug state, please use 'on' or 'off'");
+                	bbx.log(Level.INFO, "Invalid debug state, please use 'on' or 'off'");
+            	}
+            	return true;
             }
         }
         
