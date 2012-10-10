@@ -44,7 +44,8 @@ public class Utils {
     }
     
     public HashMap<String, Integer> loadAll() {
-        Set<String> keySet = minidb.getIndices().keySet();
+    	minidb = new Mini(folder, "buybox.mini");
+    	Set<String> keySet = minidb.getIndices().keySet();
         if ((keySet == null) || (keySet.isEmpty())) {
             return null;
         }
