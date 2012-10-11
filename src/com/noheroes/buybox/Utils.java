@@ -9,8 +9,7 @@ import com.miniDC.Mini;
 
 public class Utils {
 	private BuyBox bbx;
-    @SuppressWarnings("unused")
-	private String folder;
+    private String folder;
     private Mini minidb;
     
     public Utils(BuyBox bbx, String folder) {
@@ -56,7 +55,7 @@ public class Utils {
             arg = minidb.getArguments(key);
             itemsleft = argToItemsLeft(arg);
             if (itemsleft != null) {
-            	bbx.itemsleftHash.put(key, itemsleft);
+            	itemsleftHash.put(key, itemsleft);
             }
         }
         return itemsleftHash;

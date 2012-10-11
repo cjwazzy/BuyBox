@@ -87,6 +87,9 @@ public class BuyBoxPlayerListener implements Listener {
 	        			if(!bbx.itemsleftHash.containsKey(playername)){
 	        				// no player found, create player with max itemsleft
 	        				bbx.itemsleftHash.put(playername, bbx.getConfig().getInt("ItemsPerPlayer"));
+        					if (bbx.getConfig().getString("Debug") == "on") { //DEBUG
+        		    			bbx.log(Level.INFO, "DEBUG: " + playername + " not found in mini; creating player with " + bbx.getConfig().getInt("ItemsPerPlayer") + " items in hash."); //DEBUG
+        		    		} //DEBUG
 	        				// write to mini
 	        				bbx.getUtils().saveAll(bbx.itemsleftHash);
 	        		    }
