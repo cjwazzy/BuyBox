@@ -4,10 +4,12 @@
  */
 package com.noheroes.buybox;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -27,7 +29,8 @@ public class BuyBox extends JavaPlugin {
 	private BuyBoxPlayerListener listener;
 	public static Economy econ = null;
 	public HashMap<String, Integer> itemsleftHash = new HashMap<String, Integer>();
-	public ArrayList<Player> bbxEditMode = new ArrayList<Player>();
+	public HashMap<Player, String> bbxEditMode = new HashMap<Player, String>();
+	public List<Location> buyBoxLocs = new LinkedList<Location>();
    
 	@SuppressWarnings("unused")
 	public void onEnable(){
@@ -38,7 +41,8 @@ public class BuyBox extends JavaPlugin {
         } else {
 			final FileConfiguration config = this.getConfig();
 			utils = new Utils(this,  this.getDataFolder().getPath());
-			itemsleftHash = utils.loadAll();
+			itemsleftHash = utils.loadMiniToHash();
+			buyBoxLocs = utils.loadLocs();
 			listener = new BuyBoxPlayerListener(this);
 	        this.getServer().getPluginManager().registerEvents(listener, this);
 	        getCommand("buybox").setExecutor(new BuyBoxCommandExecutor(this));
@@ -76,18 +80,18 @@ public class BuyBox extends JavaPlugin {
         return econ != null;
     }
 	
-	public void addPlayerToEditMode(Player player) {
-        if (this.bbxEditMode.contains(player)) {
-            player.sendMessage(ChatColor.RED + "You are already in create mode, right click to cancel");
+	public void addPlayerToEditMode(Player player, String bbxname) {
+        if (this.bbxEditMode.containsKey(player)) {
+            player.sendMessage(ChatColor.RED + "You are already in create mode, right click to cancel/exit");
             return;
         } else {
-        bbxEditMode.add(player);
+        bbxEditMode.put(player, bbxname);
         player.sendMessage(ChatColor.RED + "Left click a chest to set BuyBox, right click to cancel");
         }
     }
     
     public void removePlayerFromEditMode(Player player) {
-    	if (this.bbxEditMode.contains(player)) {
+    	if (this.bbxEditMode.containsKey(player)) {
     		bbxEditMode.remove(player);
         }
     }

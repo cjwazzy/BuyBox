@@ -6,6 +6,7 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.economy.EconomyResponse.ResponseType;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,34 +32,40 @@ public class BuyBoxPlayerListener implements Listener {
 	@EventHandler (ignoreCancelled=true, priority = EventPriority.NORMAL)
     public void onPlayerClick(PlayerInteractEvent event) {
         //admin edit mode
-    	if (bbx.bbxEditMode.contains(event.getPlayer())) {
+    	if (bbx.bbxEditMode.containsKey(event.getPlayer())) {
     		Player player = event.getPlayer();
     		String playername = player.getName().toLowerCase();
         	if (event.getAction().equals(Action.LEFT_CLICK_BLOCK) && event.getClickedBlock() != null) {
         		if (event.getClickedBlock().getType() == Material.CHEST) {
+        			String bbxname = bbx.bbxEditMode.get(playername);
 	        		//get and add coords, remove player from edit
-	        		bbx.getConfig().set("X", event.getClickedBlock().getLocation().getBlockX());
-	        		bbx.getConfig().set("Y", event.getClickedBlock().getLocation().getBlockY());
-	        		bbx.getConfig().set("Z", event.getClickedBlock().getLocation().getBlockZ());
-	        		bbx.saveConfig();
-	        		player.sendMessage(ChatColor.RED + "Buybox coordinates now set to chest at " + ChatColor.BLUE + bbx.getConfig().getInt("X") + ", " + bbx.getConfig().getInt("Y") + ", " + bbx.getConfig().getInt("Z"));
+        			Location loc = event.getClickedBlock().getLocation();
+                    bbx.getConfig().set("Boxes." + bbxname + ".X", loc.getBlockX());
+                    bbx.getConfig().set("Boxes." + bbxname + ".Y", loc.getBlockY());
+                    bbx.getConfig().set("Boxes." + bbxname + ".Z", loc.getBlockZ());
+                    bbx.getConfig().set("Boxes." + bbxname + ".World", loc.getWorld().getName());
+                    bbx.saveConfig();
+	        		player.sendMessage(ChatColor.RED + "Buybox " + bbxname + " created on chest at " + ChatColor.BLUE + bbx.getConfig().getInt("Boxes." + bbxname + ".X") + ", " + bbx.getConfig().getInt("Boxes." + bbxname + ".Y") + ", " + bbx.getConfig().getInt("Boxes." + bbxname + ".Z") + " in " + bbx.getConfig().getInt("Boxes." + bbxname + ".World"));
 	        		player.sendMessage(ChatColor.RED + "Please set price, amount, and material");
 	        		bbx.bbxEditMode.remove(player);
-	        		bbx.log(Level.INFO, "Admin " + playername + " created BuyBox at " + bbx.getConfig().getInt("X") + ", " + bbx.getConfig().getInt("Y") + ", " + bbx.getConfig().getInt("Z"));
+	        		bbx.log(Level.INFO, "Admin " + playername + " created BuyBox " + bbxname + " at " + bbx.getConfig().getInt("Boxes." + bbxname + ".X") + ", " + bbx.getConfig().getInt("Boxes." + bbxname + ".Y") + ", " + bbx.getConfig().getInt("Boxes." + bbxname + ".Z") + " in " + bbx.getConfig().getInt("Boxes." + bbxname + ".World"));
+	        		bbx.buyBoxLocs = bbx.getUtils().loadLocs();
         		} else {
-        			player.sendMessage(ChatColor.RED + "That is not a chest, please hit a chest this time :D");
-        		}
+        			player.sendMessage(ChatColor.RED + "That is not a chest, try to hit a chest this time :D");
+        		} return;
         	}
         	if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && event.getClickedBlock() != null) {
         		bbx.bbxEditMode.remove(player);
         		player.sendMessage(ChatColor.RED + "Selection mode canceled");
         		event.setCancelled(true);
+        		return;
         	}
         } else { 
         //regular player interaction
+        	Location loc = event.getClickedBlock().getLocation();
         	// BuyBox info on Lt click
         	if (event.getAction().equals(Action.LEFT_CLICK_BLOCK) && event.getClickedBlock() != null) {
-        		if (event.getClickedBlock().getLocation().getBlockX() == bbx.getConfig().getInt("X") && event.getClickedBlock().getLocation().getBlockY() == bbx.getConfig().getInt("Y") && event.getClickedBlock().getLocation().getBlockZ() == bbx.getConfig().getInt("Z")) {
+        		if (bbx.getUtils().isBuyBox(loc)) {
         			Player player = event.getPlayer();
         			String playername = player.getName().toLowerCase();
         			event.setCancelled(true);
@@ -76,7 +83,7 @@ public class BuyBoxPlayerListener implements Listener {
         	}
         	// sell to BuyBox on Rt click
 	    	if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && event.getClickedBlock() != null) {
-	        	if (event.getClickedBlock().getLocation().getBlockX() == bbx.getConfig().getInt("X") && event.getClickedBlock().getLocation().getBlockY() == bbx.getConfig().getInt("Y") && event.getClickedBlock().getLocation().getBlockZ() == bbx.getConfig().getInt("Z")) {
+	    		if (bbx.getUtils().isBuyBox(loc)) {
 	        		Player player = event.getPlayer();
 	        		String playername = player.getName().toLowerCase();
 	        		PlayerInventory inventory = player.getInventory();

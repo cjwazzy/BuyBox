@@ -1,7 +1,10 @@
 package com.noheroes.buybox;
 
+import java.util.Set;
 import java.util.logging.Level;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -41,7 +44,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
             }
             else {
             	if (Utils.isInteger(args[1]) && (Integer.valueOf(args[1]) >= 0)) {
-                	bbx.getConfig().set("ItemsPerPlayer", Integer.valueOf(args[1]));
+            		bbx.getConfig().set("ItemsPerPlayer", Integer.valueOf(args[1]));
                 	bbx.saveConfig();
                 	bbx.itemsleftHash.clear();
                 	// write to mini
@@ -162,7 +165,52 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
             } else {
             	cs.sendMessage(ChatColor.WHITE + "The BuyBox is a place for " + bbx.getConfig().getString("CityName") + " to purchase needed materials from its helpful residents.");
             	cs.sendMessage(ChatColor.WHITE + "Purchase Orders may change frequently and without notice according to our current needs");
+            	cs.sendMessage(ChatColor.WHITE + "Use " + ChatColor.YELLOW + "/bbx list" + ChatColor.WHITE + " For a list of locations");
             return true;	
+            }
+        } 
+        
+        if (com.equalsIgnoreCase("list")) {
+            if (!(cs instanceof Player)) {
+                cs.sendMessage("You must be a player to use this command");
+                return true;
+            }
+            
+            if (!(cs.hasPermission("buybox.admin") && cs.isOp())) {
+            	Set<String> keySet = bbx.getConfig().getConfigurationSection("Boxes").getKeys(false);
+        		if ((keySet == null) || (keySet.isEmpty())) {
+        			cs.sendMessage(ChatColor.WHITE + "No BuyBoxes found on the server, sorry.");
+                    return true;
+                }
+        		cs.sendMessage(ChatColor.WHITE + "BuyBox Locations:");
+        		for (String key : keySet) {
+        			String wName = bbx.getConfig().getString("Boxes." + key + ".World");
+        	        World world = Bukkit.getWorld(wName);
+        	        if (world == null) {
+        	                bbx.log(Level.WARNING, "World " + wName + " does not exist for the BuyBox location");
+        	                break;
+        	        }
+        	        cs.sendMessage(key + " at " + bbx.getConfig().getInt("Boxes." + key + ".X") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Y") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Z") + " in " + wName);
+        		}
+        		return true;
+            }
+            else {
+            	Set<String> keySet = bbx.getConfig().getConfigurationSection("Boxes").getKeys(false);
+        		if ((keySet == null) || (keySet.isEmpty())) {
+        			cs.sendMessage(ChatColor.WHITE + "No BuyBoxes found on the server, sorry.");
+                    return true;
+                }
+        		cs.sendMessage(ChatColor.WHITE + "BuyBox Locations:");
+        		for (String key : keySet) {
+        			String wName = bbx.getConfig().getString("Boxes." + key + ".World");
+        	        World world = Bukkit.getWorld(wName);
+        	        if (world == null) {
+        	                bbx.log(Level.WARNING, "World " + wName + " does not exist for the BuyBox location");
+        	                break;
+        	        }
+        	        cs.sendMessage(bbx.getConfig().getInt("Boxes." + key + ".X") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Y") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Z") + " in " + wName);
+        		}
+        		return true;	
             }
         } 
         
@@ -175,8 +223,12 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
                 return true;
             }
+            if (args.length < 2){
+            	cs.sendMessage(ChatColor.RED + "Please specify a name (no spaces) for this buybox");
+                return true;
+            }
             else {
-                    bbx.addPlayerToEditMode((Player)cs);
+                    bbx.addPlayerToEditMode((Player)cs, (String)args[1].toLowerCase());
                     bbx.log(Level.INFO, "Admin " + playername + " entered create mode");
                     return true;
             }
@@ -194,9 +246,10 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
             }
             else {
     			bbx.reloadConfig();
-				bbx.itemsleftHash = bbx.getUtils().loadAll();
-                bbx.log(Level.INFO, "Admin " + playername + " reloaded the Config and itemsleft Hashmap from disk (minidb)");
-                cs.sendMessage(ChatColor.RED + "Config and itemsleft Hashmap reloaded");
+				bbx.itemsleftHash = bbx.getUtils().loadMiniToHash();
+				bbx.buyBoxLocs = bbx.getUtils().loadLocs();
+                bbx.log(Level.INFO, "Admin " + playername + " reloaded the Config, BuyBox locations, and itemsleft Hashmap from disk (minidb)");
+                cs.sendMessage(ChatColor.RED + "Config, BuyBox locations, and itemsleft Hashmap reloaded");
                 return true;
             }
         }
@@ -213,21 +266,21 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 return true;
             }
             else {
-            	if (args[1].equalsIgnoreCase ("on") || args[1].equalsIgnoreCase ("true") || args[1].equalsIgnoreCase ("enable")) {
+            	if (args.length < 2 || !(args[1].equalsIgnoreCase ("on") || args[1].equalsIgnoreCase ("true") || args[1].equalsIgnoreCase ("enable") || args[1].equalsIgnoreCase ("off") || args[1].equalsIgnoreCase ("false") || args[1].equalsIgnoreCase ("disable"))) {
+            		cs.sendMessage(ChatColor.BLUE + "Invalid debug state, please use 'on' or 'off'");
+                	bbx.log(Level.INFO, "Invalid debug state, please use 'on' or 'off'");
+            	}
+            	else if (args[1].equalsIgnoreCase ("on") || args[1].equalsIgnoreCase ("true") || args[1].equalsIgnoreCase ("enable")) {
             		bbx.getConfig().set("Debug", "on");
                 	bbx.saveConfig();
                 	cs.sendMessage(ChatColor.BLUE + "BuyBox debug mode is now " + bbx.getConfig().getString("Debug") + ", check console for debug messages.");
                 	bbx.log(Level.INFO, "BuyBox debug mode is now " + bbx.getConfig().getString("Debug"));
             	}
-            	if (args[1].equalsIgnoreCase ("off") || args[1].equalsIgnoreCase ("false") || args[1].equalsIgnoreCase ("disable")) {
+            	else if (args[1].equalsIgnoreCase ("off") || args[1].equalsIgnoreCase ("false") || args[1].equalsIgnoreCase ("disable")) {
             		bbx.getConfig().set("Debug", "off");
                 	bbx.saveConfig();
                 	cs.sendMessage(ChatColor.BLUE + "BuyBox debug mode is now " + bbx.getConfig().getString("Debug") + ", check console for debug messages.");
                 	bbx.log(Level.INFO, "BuyBox debug mode is now " + bbx.getConfig().getString("Debug"));
-            	}
-            	if (!(args[1].equalsIgnoreCase ("on") || args[1].equalsIgnoreCase ("true") || args[1].equalsIgnoreCase ("enable") || args[1].equalsIgnoreCase ("off") || args[1].equalsIgnoreCase ("false") || args[1].equalsIgnoreCase ("disable"))) {
-                	cs.sendMessage(ChatColor.BLUE + "Invalid debug state, please use 'on' or 'off'");
-                	bbx.log(Level.INFO, "Invalid debug state, please use 'on' or 'off'");
             	}
             	return true;
             }
@@ -241,7 +294,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
             	// Reverse Permission Check
             	if (!(cs.hasPermission("buybox.admin") && cs.isOp())) {
             		cs.sendMessage("BuyBox Help:     " + ChatColor.YELLOW + "/buybox /bbox /bbx");
-            		cs.sendMessage("Use '/bbx info' for more information");
+            		cs.sendMessage("Use " + ChatColor.YELLOW + "/bbx info" + ChatColor.WHITE + " for more information or " + ChatColor.YELLOW + "/bbx list" + ChatColor.WHITE + " for locations");
             	}
             	cs.sendMessage(ChatColor.BLUE + bbx.getConfig().getString("CityName") + " is currently buying " + ChatColor.WHITE + bbx.getConfig().getString("ItemsPerPlayer") + " " + bbx.getConfig().getString("ItemInNeed") + ChatColor.BLUE + " at " + ChatColor.WHITE + bbx.getConfig().getDouble("PricePerItem") + " " + BuyBox.econ.currencyNamePlural() + ChatColor.BLUE + " each.");
             	// Reverse Permission Check
@@ -253,7 +306,6 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
 	            		cs.sendMessage(ChatColor.BLUE + "You may sell " + ChatColor.WHITE + bbx.itemsleftHash.get(playername) + ChatColor.BLUE + " more on this purchase order");
 	            	}
             	}
-            	cs.sendMessage(ChatColor.BLUE + "Buybox location is " + ChatColor.WHITE + bbx.getConfig().getInt("X") + ", " + bbx.getConfig().getInt("Y") + ", " + bbx.getConfig().getInt("Z"));
             	// Permission Check
             	if (cs.hasPermission("buybox.admin") && cs.isOp()) {
             		cs.sendMessage("BuyBox Admin Command Help:     " + ChatColor.YELLOW + "/buybox /bbox /bbx");
@@ -264,6 +316,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
             		cs.sendMessage(ChatColor.WHITE + "Please use " + ChatColor.YELLOW + "/bbx reset " + ChatColor.WHITE + "after changing commodity or price");
             		cs.sendMessage(ChatColor.YELLOW + "/bbx create " + ChatColor.WHITE + " Create BuyBox; old locations will be overwritten");
             		cs.sendMessage(ChatColor.YELLOW + "/bbx city " + ChatColor.WHITE + " Sets your city name; No spaces allowed");
+            		cs.sendMessage(ChatColor.YELLOW + "/bbx reload " + ChatColor.WHITE + " Reload config, locations and player POs");
             		
             	}
             return true;	

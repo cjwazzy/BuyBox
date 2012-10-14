@@ -1,9 +1,16 @@
 package com.noheroes.buybox;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+
 import com.miniDC.Arguments;
 import com.miniDC.Mini;
 
@@ -20,6 +27,9 @@ public class Utils {
 	
     public void saveAll(HashMap<String, Integer> itemsleftHash) {
     	Arguments arg;
+    	if (bbx.itemsleftHash == null) {
+    		return;
+    	}
         Set<String> keySet = bbx.itemsleftHash.keySet();
         for (String playername : keySet) {
             arg = ItemsLeftToArg(playername);
@@ -42,7 +52,7 @@ public class Utils {
         minidb.update();
     }
     
-    public HashMap<String, Integer> loadAll() {
+    public HashMap<String, Integer> loadMiniToHash() {
     	minidb = new Mini(folder, "buybox.mini");
     	Set<String> keySet = minidb.getIndices().keySet();
         if ((keySet == null) || (keySet.isEmpty())) {
@@ -59,6 +69,37 @@ public class Utils {
             }
         }
         return itemsleftHash;
+    }
+    
+	public List<Location> loadLocs() {
+		List<Location> buyBoxLocsList = new LinkedList<Location>();
+		if (!(bbx.getConfig().contains("Boxes"))) {
+			bbx.log(Level.WARNING, "No BuyBoxes found in config74");
+			return buyBoxLocsList;
+		}
+		Set<String> keySet = bbx.getConfig().getConfigurationSection("Boxes").getKeys(false);
+		if ((keySet == null) || (keySet.isEmpty())) {
+			bbx.log(Level.WARNING, "No BuyBoxes found in config79");
+            return buyBoxLocsList;
+        }
+		for (String key : keySet) {
+			String wName = bbx.getConfig().getString("Boxes." + key + ".World");
+	        World world = Bukkit.getWorld(wName);
+	        if (world == null) {
+	                bbx.log(Level.WARNING, "World " + wName + " does not exist for the BuyBox location");
+	                break;
+	        }
+	        Location loc = new Location(world, bbx.getConfig().getInt("Boxes." + key + ".X"), bbx.getConfig().getInt("Boxes." + key + ".Y"), bbx.getConfig().getInt("Boxes." + key + ".Z"));
+			buyBoxLocsList.add(loc);
+		}
+		return buyBoxLocsList;
+	}
+    
+    public boolean isBuyBox(Location loc) {
+    	if (bbx.buyBoxLocs == null) {
+    		return false;
+    	}
+    	return bbx.buyBoxLocs.contains(loc);	
     }
     
     private Integer argToItemsLeft(Arguments arg) {
@@ -122,4 +163,5 @@ public class Utils {
             return material;
         }
     }
+
 }
