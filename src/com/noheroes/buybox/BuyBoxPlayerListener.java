@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
@@ -37,7 +38,7 @@ public class BuyBoxPlayerListener implements Listener {
     		String playername = player.getName().toLowerCase();
         	if (event.getAction().equals(Action.LEFT_CLICK_BLOCK) && event.getClickedBlock() != null) {
         		if (event.getClickedBlock().getType() == Material.CHEST) {
-        			String bbxname = bbx.bbxEditMode.get(playername);
+        			String bbxname = bbx.bbxEditMode.get(player);
 	        		//get and add coords, remove player from edit
         			Location loc = event.getClickedBlock().getLocation();
                     bbx.getConfig().set("Boxes." + bbxname + ".X", loc.getBlockX());
@@ -56,6 +57,7 @@ public class BuyBoxPlayerListener implements Listener {
         	}
         	if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && event.getClickedBlock() != null) {
         		bbx.bbxEditMode.remove(player);
+        		bbx.log(Level.INFO, "Admin " + playername + " canceled creation mode");
         		player.sendMessage(ChatColor.RED + "Selection mode canceled");
         		event.setCancelled(true);
         		return;
@@ -192,6 +194,17 @@ public class BuyBoxPlayerListener implements Listener {
 	        	}
 	        }
 	    }
+    }
+    
+    // Monitors block breaking to remove broken BuyBox
+    @EventHandler (priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        if (event.getBlock().getType().equals((Material.CHEST))) {
+            Location loc = event.getBlock().getLocation();
+            if (bbx.getUtils().isBuyBox(loc)) {
+                
+            }
+        }
     }
     
     // Exits edit mode if a player logs off

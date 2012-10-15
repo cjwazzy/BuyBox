@@ -53,12 +53,12 @@ public class Utils {
     }
     
     public HashMap<String, Integer> loadMiniToHash() {
+    	HashMap<String, Integer> itemsleftHash = new HashMap<String, Integer>();
     	minidb = new Mini(folder, "buybox.mini");
     	Set<String> keySet = minidb.getIndices().keySet();
         if ((keySet == null) || (keySet.isEmpty())) {
-            return null;
+            return itemsleftHash;
         }
-        HashMap<String, Integer> itemsleftHash = new HashMap<String, Integer>();
         Arguments arg;
         Integer itemsleft;
         for (String key : keySet) {
@@ -93,6 +93,31 @@ public class Utils {
 			buyBoxLocsList.add(loc);
 		}
 		return buyBoxLocsList;
+	}
+	
+	public String getBuyBoxName(Location loc) {
+		if (!(bbx.getConfig().contains("Boxes"))) {
+			bbx.log(Level.WARNING, "BuyBox location matches but no buyboxes found");
+			return "none";
+		}
+		Set<String> keySet = bbx.getConfig().getConfigurationSection("Boxes").getKeys(false);
+		if ((keySet == null) || (keySet.isEmpty())) {
+			bbx.log(Level.WARNING, "BuyBox location matches but no buyboxes found");
+            return "none";
+		}
+		for (String key : keySet) {
+			if (loc.getWorld().getName() == bbx.getConfig().getString("Boxes." + key + ".World")); {
+				if (loc.getBlockX() == bbx.getConfig().getInt("Boxes." + key + ".X")); {
+					if (loc.getBlockY() == bbx.getConfig().getInt("Boxes." + key + ".Y")); {
+						if (loc.getBlockZ() == bbx.getConfig().getInt("Boxes." + key + ".Z")); {
+							return key;
+						}
+					}
+				}
+			}
+			
+		}
+		return "none";
 	}
     
     public boolean isBuyBox(Location loc) {

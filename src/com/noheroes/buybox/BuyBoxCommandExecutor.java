@@ -175,7 +175,10 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 cs.sendMessage("You must be a player to use this command");
                 return true;
             }
-            
+            if (!(bbx.getConfig().contains("Boxes"))) {
+            	cs.sendMessage(ChatColor.WHITE + "No BuyBoxes found on the server, sorry.");
+    			return true;
+    		}
             if (!(cs.hasPermission("buybox.admin") && cs.isOp())) {
             	Set<String> keySet = bbx.getConfig().getConfigurationSection("Boxes").getKeys(false);
         		if ((keySet == null) || (keySet.isEmpty())) {
@@ -190,7 +193,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
         	                bbx.log(Level.WARNING, "World " + wName + " does not exist for the BuyBox location");
         	                break;
         	        }
-        	        cs.sendMessage(key + " at " + bbx.getConfig().getInt("Boxes." + key + ".X") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Y") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Z") + " in " + wName);
+        	        cs.sendMessage(bbx.getConfig().getInt("Boxes." + key + ".X") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Y") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Z") + " in " + wName);
         		}
         		return true;
             }
@@ -208,13 +211,13 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
         	                bbx.log(Level.WARNING, "World " + wName + " does not exist for the BuyBox location");
         	                break;
         	        }
-        	        cs.sendMessage(bbx.getConfig().getInt("Boxes." + key + ".X") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Y") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Z") + " in " + wName);
+        	        cs.sendMessage(key + " at " + bbx.getConfig().getInt("Boxes." + key + ".X") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Y") + ", " + bbx.getConfig().getInt("Boxes." + key + ".Z") + " in " + wName);
         		}
         		return true;	
             }
         } 
         
-        if (com.equalsIgnoreCase("create")) {
+        if (com.equalsIgnoreCase("create") || com.equalsIgnoreCase("add")) {
             if (!(cs instanceof Player)) {
                 cs.sendMessage("You must be a player to use this command");
                 return true;
@@ -224,12 +227,36 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
                 return true;
             }
             if (args.length < 2){
-            	cs.sendMessage(ChatColor.RED + "Please specify a name (no spaces) for this buybox");
+            	cs.sendMessage(ChatColor.RED + "Please use " + ChatColor.YELLOW + "/buybox create [name]" + ChatColor.RED + " for this buybox");
                 return true;
             }
             else {
-                    bbx.addPlayerToEditMode((Player)cs, (String)args[1].toLowerCase());
-                    bbx.log(Level.INFO, "Admin " + playername + " entered create mode");
+            		String bbxname = args[1].toLowerCase();
+                    bbx.addPlayerToEditMode((Player)cs, (String)bbxname);
+                    bbx.log(Level.INFO, "Admin " + playername + " entered create mode, buybox name = " + bbxname);
+                    return true;
+            }
+        }
+        
+        if (com.equalsIgnoreCase("remove") || com.equalsIgnoreCase("delete")) {
+            if (!(cs instanceof Player)) {
+                cs.sendMessage("You must be a player to use this command");
+                return true;
+            }
+            if (!(cs.hasPermission("buybox.admin") && cs.isOp())) {
+                cs.sendMessage(ChatColor.RED + "You do not have permission to use this command");
+                return true;
+            }
+            if (args.length < 2){
+            	cs.sendMessage(ChatColor.RED + "Please use " + ChatColor.YELLOW + "/buybox remove [name]" + ChatColor.RED + " for this buybox");
+                return true;
+            }
+            else {
+            		String bbxname = args[1].toLowerCase();
+            		bbx.getConfig().set("Boxes." + bbxname, null);
+            		bbx.saveConfig();
+            		cs.sendMessage(ChatColor.RED + "You have deleted Buybox " + bbxname);
+                    bbx.log(Level.INFO, "Admin " + playername + " deleted Buybox " + bbxname);
                     return true;
             }
         }
@@ -321,6 +348,8 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
             	}
             return true;	
             }
+        } else {
+        	cs.sendMessage(ChatColor.RED + "Command not recognized. Try " + ChatColor.YELLOW + "/bbx help");
         }
 		return true;
 	}
