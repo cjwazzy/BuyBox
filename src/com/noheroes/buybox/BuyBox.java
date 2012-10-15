@@ -93,6 +93,7 @@ public class BuyBox extends JavaPlugin {
     public void removePlayerFromEditMode(Player player) {
     	if (this.bbxEditMode.containsKey(player)) {
     		bbxEditMode.remove(player);
+    		log(Level.INFO, "Admin " + player.getName() + " canceled creation mode");
         }
     }
 }
