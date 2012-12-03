@@ -49,7 +49,7 @@ public class BuyBoxPlayerListener implements Listener {
                 bbx.getConfig().set("Boxes." + bbxname + ".Z", loc.getBlockZ());
                 bbx.getConfig().set("Boxes." + bbxname + ".World", loc.getWorld().getName());
                 bbx.saveConfig();
-        		player.sendMessage(ChatColor.RED + "Buybox " + bbxname + " created on chest at " + ChatColor.BLUE + bbx.getConfig().getInt("Boxes." + bbxname + ".X") + ", " + bbx.getConfig().getInt("Boxes." + bbxname + ".Y") + ", " + bbx.getConfig().getInt("Boxes." + bbxname + ".Z") + " in " + bbx.getConfig().getInt("Boxes." + bbxname + ".World"));
+        		player.sendMessage(ChatColor.RED + "Buybox " + bbxname + " created at " + ChatColor.BLUE + bbx.getConfig().getInt("Boxes." + bbxname + ".X") + ", " + bbx.getConfig().getInt("Boxes." + bbxname + ".Y") + ", " + bbx.getConfig().getInt("Boxes." + bbxname + ".Z") + " in " + bbx.getConfig().getInt("Boxes." + bbxname + ".World"));
         		player.sendMessage(ChatColor.RED + "Please set price, amount, and material");
         		bbx.bbxEditMode.remove(player);
         		bbx.log(Level.INFO, "Admin " + playername + " created BuyBox " + bbxname + " at " + bbx.getConfig().getInt("Boxes." + bbxname + ".X") + ", " + bbx.getConfig().getInt("Boxes." + bbxname + ".Y") + ", " + bbx.getConfig().getInt("Boxes." + bbxname + ".Z") + " in " + bbx.getConfig().getInt("Boxes." + bbxname + ".World"));
