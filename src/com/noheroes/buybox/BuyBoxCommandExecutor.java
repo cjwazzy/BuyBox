@@ -255,6 +255,7 @@ public class BuyBoxCommandExecutor implements CommandExecutor {
             		String bbxname = args[1].toLowerCase();
             		bbx.getConfig().set("Boxes." + bbxname, null);
             		bbx.saveConfig();
+            		bbx.buyBoxLocs = bbx.getUtils().loadLocs();
             		cs.sendMessage(ChatColor.RED + "You have deleted Buybox " + bbxname);
                     bbx.log(Level.INFO, "Admin " + playername + " deleted Buybox " + bbxname);
                     return true;
