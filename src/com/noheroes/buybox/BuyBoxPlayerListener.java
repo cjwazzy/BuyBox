@@ -41,11 +41,6 @@ public class BuyBoxPlayerListener implements Listener {
     		Player player = event.getPlayer();
     		String playername = player.getName().toLowerCase();
         	if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
-        		if (event.getClickedBlock().getType() != Material.CHEST) {
-        			player.sendMessage(ChatColor.RED + "That is not a chest, try to hit a chest this time :D");
-        			return;
-        		}
-        		
     			String bbxname = bbx.bbxEditMode.get(player);
         		//get and add coords, remove player from edit
     			Location loc = event.getClickedBlock().getLocation();
@@ -102,11 +97,6 @@ public class BuyBoxPlayerListener implements Listener {
         		String playername = player.getName().toLowerCase();
         		PlayerInventory inventory = player.getInventory();
         		Integer itemsleft = 0;
-        		Material block = event.getClickedBlock().getType();
-        		if (block != Material.CHEST) {
-        			return;
-        		}
-        		
     			event.setCancelled(true);
     			if(!bbx.itemsleftHash.containsKey(playername)){
     				// no player found, create player with max itemsleft
@@ -226,10 +216,6 @@ public class BuyBoxPlayerListener implements Listener {
     // Monitors block breaking to remove broken BuyBox
     @EventHandler (priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
-        if (!event.getBlock().getType().equals((Material.CHEST))) {
-        	return;
-        }
-        
         Location loc = event.getBlock().getLocation();
         if (bbx.getUtils().isBuyBox(loc)) {
         	Player player = event.getPlayer();

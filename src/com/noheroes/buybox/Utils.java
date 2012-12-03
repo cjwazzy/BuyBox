@@ -74,12 +74,12 @@ public class Utils {
 	public List<Location> loadLocs() {
 		List<Location> buyBoxLocsList = new LinkedList<Location>();
 		if (!(bbx.getConfig().contains("Boxes"))) {
-			bbx.log(Level.WARNING, "No BuyBoxes found in config74");
+			bbx.log(Level.WARNING, "No BuyBox locations found in config");
 			return buyBoxLocsList;
 		}
 		Set<String> keySet = bbx.getConfig().getConfigurationSection("Boxes").getKeys(false);
 		if ((keySet == null) || (keySet.isEmpty())) {
-			bbx.log(Level.WARNING, "No BuyBoxes found in config79");
+			bbx.log(Level.WARNING, "No BuyBox locations found in config");
             return buyBoxLocsList;
         }
 		for (String key : keySet) {

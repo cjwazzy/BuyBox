@@ -86,7 +86,7 @@ public class BuyBox extends JavaPlugin {
             return;
         } else {
         bbxEditMode.put(player, bbxname);
-        player.sendMessage(ChatColor.RED + "Left click a chest to set BuyBox " + bbxname + ", right click to cancel");
+        player.sendMessage(ChatColor.RED + "Left click a block to create a BuyBox " + bbxname + ", right click to cancel");
         }
     }
     
